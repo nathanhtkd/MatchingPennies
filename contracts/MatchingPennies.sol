@@ -1,17 +1,20 @@
 pragma solidity ^0.8.0;
 
 contract MatchingPennies {
+    // address variables to keep track of player's address
     address public player1;
     address public player2;
+    // variable to store the reward for the winner
     uint256 public reward;
+    // variables to store player's choice
     uint256 public player1Choice;
     uint256 public player2Choice;
 
+
     function joinGame() public payable {
-        require(
-            player1 == address(0x0) || player2 == address(0x0),
-            "Game is full"
-        );
+        require(player1 == address(0x0) || player2 == address(0x0), "Game is full");
+        require(msg.sender != player1, "You can't play against yourself!");
+        // msg.value represents amount of ether sent with a message 
         require(msg.value >= 0.1 ether, "Minimum bet is 0.1 ETH");
 
         if (player1 == address(0x0)) {
@@ -26,15 +29,12 @@ contract MatchingPennies {
     }
 
     function play(uint256 choice) public {
-        require(
-            msg.sender == player1 || msg.sender == player2,
-            "You are not a player"
-        );
-        require(
-            player1 != address(0x0) && player2 != address(0x0),
-            "Game is not full"
-        );
-        require(choice == 0 || choice == 1, "Invalid choice");
+        // only valid players can play 
+        require(msg.sender == player1 || msg.sender == player2, "You are not one of the current players!");
+        // check if player address have been filled
+        require(player1 != address(0x0) && player2 != address(0x0), "There is a missing player slot.");
+        // choice has to be 1 or 0
+        require(choice == 0 || choice == 1, "Invalid Choice (0 or 1)");
 
         if (msg.sender == player1) {
             player1Choice = choice;
@@ -42,19 +42,27 @@ contract MatchingPennies {
             player2Choice = choice;
         }
 
-        if (player1Choice != 0 && player2Choice != 0) {
-            if (player1Choice == player2Choice) {
-                payable(player1).transfer(reward);
-            } else {
-                payable(player2).transfer(reward);
-            }
 
-            // Reset game
-            player1Choice = 0;
-            player2Choice = 0;
-            player1 = address(0x0);
-            player2 = address(0x0);
-            reward = 0;
+        // p1 wins if choices are the same, otherwise p2 wins
+        if (player1Choice == player2Choice) {
+            payable(player1).transfer(reward);
+        } else {
+            payable(player2).transfer(reward);
         }
+
+        // Reset game
+        player1Choice = 0;
+        player2Choice = 0;
+        player1 = address(0x0);
+        player2 = address(0x0);
+        reward = 0;
+    }
+
+    function reset() public {
+        player1Choice = 0;
+        player2Choice = 0;
+        player1 = address(0x0);
+        player2 = address(0x0);
+        reward = 0;
     }
 }
