@@ -7,9 +7,11 @@ contract MatchingPennies {
     address public player1;
     address public player2;
     address public winner;
+    
     // variable to store the reward for the winner
     uint256 public reward;
-    // variables to store player's choice, PRIVATE so dishonest party cannot view at other's answers
+
+    // variables to store player's choice, PRIVATE so participants cannot view other's answers
     string private player1Choice;
     string private player2Choice;
 
